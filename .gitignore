@@ -12,7 +12,6 @@ dist/
 
 # Prisma
 src/generated/
-prisma/migrations/
 
 # Environment files
 .env
