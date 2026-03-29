@@ -92,6 +92,22 @@ model Media {
   siteResume   SiteSettings[] @relation("Resume")
 }
 
+model Experience {
+  id          String    @id @default(cuid())
+  title       String
+  company     String
+  description String
+  techStack   String[]
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  published   Boolean   @default(false)
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
 model PageView {
   id        String   @id @default(cuid())
   path      String

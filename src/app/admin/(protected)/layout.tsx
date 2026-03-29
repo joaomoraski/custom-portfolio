@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   FolderGit2,
   FileText,
+  Briefcase,
   Trophy,
   MessageSquare,
   Settings,
@@ -15,6 +16,7 @@ import {
 const navItems = [
   { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/admin/projects", label: "Projects", Icon: FolderGit2 },
+  { href: "/admin/experiences", label: "Experiences", Icon: Briefcase },
   { href: "/admin/blog", label: "Blog", Icon: FileText },
   { href: "/admin/achievements", label: "Achievements", Icon: Trophy },
   { href: "/admin/messages", label: "Messages", Icon: MessageSquare },
