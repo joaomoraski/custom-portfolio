@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  techStack   String[]
+  imageIds    String[] // Stores array of Media IDs
+  githubUrl   String?
+  liveUrl     String?
+  published   Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+model BlogPost {
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  excerpt      String?
+  content      String
+  imageIds     String[]
+  published    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+}
+
+model Achievement {
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  excerpt      String?
+  content      String
+  imageIds     String[]
+  published    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+}
+
+model ContactMessage {
+  id        String    @id @default(cuid())
+  name      String
+  email     String?
+  subject   String
+  message   String
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model SiteSettings {
+  id             String  @id @default("singleton")
+  name           String  @default("")
+  title          String  @default("")
+  bio            String  @default("")
+  aboutContent   String  @default("")
+  resumeId       String?
+  resume         Media?  @relation("Resume", fields: [resumeId], references: [id])
+  resumeFileName String? @default("João_Moraski_Resume.pdf")
+  linkedinUrl    String  @default("")
+  githubUrl      String  @default("")
+  instagramUrl   String  @default("")
+  email          String  @default("")
+}
+
+model Media {
+  id           String         @id @default(cuid())
+  filename     String
+  mimeType     String
+  data         Bytes
+  createdAt    DateTime       @default(now())
+  siteResume   SiteSettings[] @relation("Resume")
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  userAgent String?
+  createdAt DateTime @default(now())
+}
