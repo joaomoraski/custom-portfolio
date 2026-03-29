@@ -7,6 +7,7 @@ import { NeonButton } from "@/components/ui/neon-button";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { createProject, updateProject } from "@/actions/projects";
+import { duplicateTagsMessage, mergeCommaSeparatedUnique } from "@/lib/comma-tags";
 
 interface ProjectFormProps {
   initial?: {
@@ -30,6 +31,7 @@ export function ProjectForm({ initial }: ProjectFormProps) {
   const [description, setDescription] = useState(initial?.description ?? "");
   const [techStack, setTechStack] = useState<string[]>(initial?.techStack ?? []);
   const [techInput, setTechInput] = useState("");
+  const [techStackHint, setTechStackHint] = useState<string | null>(null);
   const [imageIds, setImageIds] = useState<string[]>(initial?.imageIds ?? []);
   const [githubUrl, setGithubUrl] = useState(initial?.githubUrl ?? "");
   const [liveUrl, setLiveUrl] = useState(initial?.liveUrl ?? "");
@@ -39,11 +41,11 @@ export function ProjectForm({ initial }: ProjectFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   const addTech = () => {
-    const val = techInput.trim();
-    if (val && !techStack.includes(val)) {
-      setTechStack([...techStack, val]);
-      setTechInput("");
-    }
+    const { merged, duplicates } = mergeCommaSeparatedUnique(techInput, techStack);
+    if (!techInput.trim()) return;
+    setTechStack(merged);
+    setTechStackHint(duplicateTagsMessage(duplicates));
+    setTechInput("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,15 +105,21 @@ export function ProjectForm({ initial }: ProjectFormProps) {
           <div className="flex gap-2">
             <input
               value={techInput}
-              onChange={(e) => setTechInput(e.target.value)}
+              onChange={(e) => {
+                setTechInput(e.target.value);
+                setTechStackHint(null);
+              }}
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTech(); } }}
               className={inputClass}
-              placeholder="Add technology and press Enter"
+              placeholder="e.g. React, TypeScript — comma-separated or Enter"
             />
             <NeonButton type="button" variant="ghost" onClick={addTech} size="sm">
               <Plus size={14} />
             </NeonButton>
           </div>
+          {techStackHint && (
+            <p className="text-xs text-amber-600 dark:text-amber-400/90 mt-1.5">{techStackHint}</p>
+          )}
         </div>
 
         <div>
