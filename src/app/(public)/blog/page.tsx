@@ -12,7 +12,7 @@ export default async function BlogPage() {
       </div>
 
       {posts.length === 0 ? (
-        <div className="text-center py-20 dark:text-white/40 text-gray-400">
+        <div className="text-center py-20 dark:text-white/40 text-gray-500">
           No posts published yet.
         </div>
       ) : (

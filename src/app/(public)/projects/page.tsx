@@ -12,7 +12,7 @@ export default async function ProjectsPage() {
       </div>
 
       {projects.length === 0 ? (
-        <div className="text-center py-20 dark:text-white/40 text-gray-400">
+        <div className="text-center py-20 dark:text-white/40 text-gray-500">
           No projects published yet.
         </div>
       ) : (

@@ -37,7 +37,7 @@ export default async function HomePage() {
             </h1>
             <p className="text-xl dark:text-white/70 text-gray-600 font-light">{title}</p>
             {bio && (
-              <div className="text-base dark:text-white/70 text-gray-600 leading-relaxed max-w-2xl prose prose-invert dark:prose-invert prose-p:my-2 prose-a:text-purple-400">
+              <div className="max-w-2xl">
                 <MarkdownRenderer content={bio} />
               </div>
             )}

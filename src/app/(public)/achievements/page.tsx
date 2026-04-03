@@ -12,7 +12,7 @@ export default async function AchievementsPage() {
       </div>
 
       {achievements.length === 0 ? (
-        <div className="text-center py-20 dark:text-white/40 text-gray-400">
+        <div className="text-center py-20 dark:text-white/40 text-gray-500">
           No achievements published yet.
         </div>
       ) : (

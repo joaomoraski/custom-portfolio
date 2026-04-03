@@ -34,7 +34,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           {post.excerpt && (
             <p className="text-lg dark:text-white/60 text-gray-500 leading-relaxed mb-4">{post.excerpt}</p>
           )}
-          <div className="flex items-center gap-2 text-sm dark:text-white/40 text-gray-400">
+          <div className="flex items-center gap-2 text-sm dark:text-white/40 text-gray-500">
             <Calendar size={14} />
             {formatDate(post.createdAt)}
           </div>

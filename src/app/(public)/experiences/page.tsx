@@ -12,7 +12,7 @@ export default async function ExperiencesPage() {
       </div>
 
       {experiences.length === 0 ? (
-        <div className="text-center py-20 dark:text-white/40 text-gray-400">
+        <div className="text-center py-20 dark:text-white/40 text-gray-500">
           No experiences published yet.
         </div>
       ) : (
