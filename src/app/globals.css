@@ -46,6 +46,10 @@ body {
 /* Inline code: dark mode */
 :root.dark .prose code { color: rgb(34, 211, 238); background: rgba(34,211,238,0.1); }
 
+/* Restore list styles stripped by Tailwind reset */
+ul { list-style-type: disc; }
+ol { list-style-type: decimal; }
+
 /* Orbital map keyframes */
 @keyframes omPulse { 0%,100% { opacity: .35; transform: scale(1); } 50% { opacity: .9; transform: scale(1.28); } }
 @keyframes omCore { 0%,100% { opacity: .55; } 50% { opacity: 1; } }

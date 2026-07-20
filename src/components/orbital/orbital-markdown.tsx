@@ -78,7 +78,7 @@ export function OrbitalMarkdown({ content }: { content: string }) {
         i++;
       }
       blocks.push(
-        <ul key={k++} style={{ margin: "12px 0", paddingLeft: 20, lineHeight: 1.6, fontFamily: "var(--font-ibm-plex), 'IBM Plex Sans', sans-serif", fontSize: 15, color: "#c6cbe0" }}>
+        <ul key={k++} style={{ margin: "12px 0", paddingLeft: 20, lineHeight: 1.6, fontFamily: "var(--font-ibm-plex), 'IBM Plex Sans', sans-serif", fontSize: 15, color: "#c6cbe0", listStyleType: "disc" }}>
           {items}
         </ul>
       );
@@ -92,7 +92,7 @@ export function OrbitalMarkdown({ content }: { content: string }) {
         i++;
       }
       blocks.push(
-        <ol key={k++} style={{ margin: "12px 0", paddingLeft: 22, lineHeight: 1.6, fontFamily: "var(--font-ibm-plex), 'IBM Plex Sans', sans-serif", fontSize: 15, color: "#c6cbe0" }}>
+        <ol key={k++} style={{ margin: "12px 0", paddingLeft: 22, lineHeight: 1.6, fontFamily: "var(--font-ibm-plex), 'IBM Plex Sans', sans-serif", fontSize: 15, color: "#c6cbe0", listStyleType: "decimal" }}>
           {items}
         </ol>
       );

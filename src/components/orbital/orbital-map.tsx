@@ -664,7 +664,7 @@ export default class OrbitalMap extends React.Component<OrbitalMapProps, Orbital
 
           {/* dossier panel */}
           {sel && (
-            <div style={{ position: "absolute", top: 48, bottom: 40, right: 0, width: "40%", maxWidth: 520, minWidth: 360, background: "rgba(8,9,16,.94)", backdropFilter: "blur(6px)", borderLeft: "1px solid rgba(124,140,240,.28)", display: "flex", flexDirection: "column", pointerEvents: "auto", boxShadow: "-30px 0 60px rgba(0,0,0,.5)" }}>
+            <div style={{ position: "absolute", top: 48, bottom: 40, right: 0, width: "40%", maxWidth: 520, minWidth: 360, background: "rgba(8,9,16,.94)", backdropFilter: "blur(6px)", borderLeft: "1px solid rgba(124,140,240,.28)", display: "flex", flexDirection: "column", pointerEvents: "auto", boxShadow: "-30px 0 60px rgba(0,0,0,.5)", userSelect: "text" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid rgba(124,140,240,.16)" }}>
                 <div style={{ fontSize: 10, letterSpacing: ".2em", color: "#5a6180" }}>DOSSIER {"·"} {sel.designation}</div>
                 <button onClick={this.closeSelected} style={{ fontFamily: "inherit", fontSize: 11, letterSpacing: ".1em", color: "#aeb6cf", background: "transparent", border: "1px solid rgba(124,140,240,.3)", padding: "5px 10px", cursor: "pointer" }}>CLOSE&nbsp;esc</button>
