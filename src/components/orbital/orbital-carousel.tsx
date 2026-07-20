@@ -86,7 +86,7 @@ export function OrbitalCarousel({ images }: { images: string[] }) {
         if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); }
       }}
     >
-      <div style={{ position: "relative", width: "100%", minHeight: 200, overflow: "hidden" }}>
+      <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9", overflow: "hidden", background: "#0a0c16" }}>
         {errors.has(cur) ? (
           <div style={{
             position: "absolute",
@@ -121,7 +121,7 @@ export function OrbitalCarousel({ images }: { images: string[] }) {
               key={cur}
               src={images[cur]}
               alt={`Image ${cur + 1}`}
-              style={{ display: "block", width: "100%", height: "auto", objectFit: "contain" }}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
               onError={() => setErrors((s) => new Set(s).add(cur))}
             />
           </>

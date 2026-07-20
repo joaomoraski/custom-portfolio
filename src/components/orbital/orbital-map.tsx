@@ -506,9 +506,9 @@ export default class OrbitalMap extends React.Component<OrbitalMapProps, Orbital
       if (/^>\s?/.test(ln)) { const buf: string[] = []; while (i < lines.length && /^>\s?/.test(lines[i])) { buf.push(lines[i].replace(/^>\s?/, "")); i++; }
         b.push(h("blockquote", { key: k++, style: { borderLeft: "2px solid #6ea8ff", paddingLeft: 14, margin: "16px 0", color: "#9aa2c2", fontStyle: "italic", fontFamily: SANS, fontSize: 15, lineHeight: 1.7 } }, this.mdInline(buf.join(" ")))); continue; }
       if (/^(-|\*)\s/.test(ln)) { const it: React.ReactNode[] = []; while (i < lines.length && /^(-|\*)\s/.test(lines[i])) { it.push(h("li", { key: k++, style: { margin: "5px 0" } }, this.mdInline(lines[i].replace(/^(-|\*)\s/, "")))); i++; }
-        b.push(h("ul", { key: k++, style: { margin: "12px 0", paddingLeft: 20, lineHeight: 1.6, fontFamily: SANS, fontSize: 15, color: "#c6cbe0" } }, it)); continue; }
+        b.push(h("ul", { key: k++, style: { margin: "12px 0", paddingLeft: 20, lineHeight: 1.6, fontFamily: SANS, fontSize: 15, color: "#c6cbe0", listStyleType: "disc" } }, it)); continue; }
       if (/^\d+\.\s/.test(ln)) { const it: React.ReactNode[] = []; while (i < lines.length && /^\d+\.\s/.test(lines[i])) { it.push(h("li", { key: k++, style: { margin: "5px 0" } }, this.mdInline(lines[i].replace(/^\d+\.\s/, "")))); i++; }
-        b.push(h("ol", { key: k++, style: { margin: "12px 0", paddingLeft: 22, lineHeight: 1.6, fontFamily: SANS, fontSize: 15, color: "#c6cbe0" } }, it)); continue; }
+        b.push(h("ol", { key: k++, style: { margin: "12px 0", paddingLeft: 22, lineHeight: 1.6, fontFamily: SANS, fontSize: 15, color: "#c6cbe0", listStyleType: "decimal" } }, it)); continue; }
       if (/^!\[([^\]]*)\]\(([^)]+)\)/.test(ln)) { const mm = ln.match(/^!\[([^\]]*)\]\(([^)]+)\)/)!;
         b.push(h("div", { key: k++, style: { position: "relative", margin: "16px 0", border: "1px solid rgba(124,140,240,.18)" } },
           h("img", { src: mm[2], alt: mm[1], style: { display: "block", width: "100%" }, onError: (e: React.SyntheticEvent<HTMLImageElement>) => { (e.target as HTMLImageElement).style.display = "none"; const ns = (e.target as HTMLElement).nextSibling as HTMLElement; if (ns) ns.style.display = "grid"; } }),

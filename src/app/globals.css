@@ -49,6 +49,10 @@ body {
 /* Restore list styles stripped by Tailwind reset */
 ul { list-style-type: disc; }
 ol { list-style-type: decimal; }
+.wmde-markdown ul { list-style-type: disc; padding-left: 20px; }
+.wmde-markdown ol { list-style-type: decimal; padding-left: 20px; }
+.w-md-editor-preview ul { list-style-type: disc; padding-left: 20px; }
+.w-md-editor-preview ol { list-style-type: decimal; padding-left: 20px; }
 
 /* Orbital map keyframes */
 @keyframes omPulse { 0%,100% { opacity: .35; transform: scale(1); } 50% { opacity: .9; transform: scale(1.28); } }
