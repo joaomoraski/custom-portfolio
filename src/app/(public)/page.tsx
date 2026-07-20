@@ -1,87 +1,221 @@
-import Link from "next/link";
-import { Download, Mail } from "lucide-react";
-import { LinkedinIcon, GithubIcon, InstagramIcon } from "@/components/ui/brand-icons";
-import { GlassCard } from "@/components/ui/glass-card";
-import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { getPublishedProjects } from "@/actions/projects";
+import { getPublishedExperiences } from "@/actions/experiences";
+import { getPublishedAchievements } from "@/actions/achievements";
+import { getPublishedBlogPosts } from "@/actions/blog";
 import { getSiteSettings } from "@/actions/settings";
+import OrbitalMapLoader from "@/components/orbital/orbital-map-loader";
+import type { OrbitalBody, Transmission, MapSettings } from "@/components/orbital/types";
 
-export default async function HomePage() {
-  const settings = await getSiteSettings().catch(() => null);
+function stripMd(md: string): string {
+  return (md || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[#>*`_~-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-  const name = settings?.name ?? "João Moraski";
-  const title = settings?.title ?? "Software Developer";
-  const bio = settings?.bio ?? "";
-  const aboutContent = settings?.aboutContent ?? "";
+function summ(md: string, n = 120): string {
+  const p = stripMd(md);
+  return p.length > n ? p.slice(0, n - 1).trim() + "…" : p;
+}
 
-  const socials = [
-    { href: settings?.linkedinUrl ?? "#", Icon: LinkedinIcon, label: "LinkedIn", color: "hover:text-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)]" },
-    { href: settings?.githubUrl ?? "#", Icon: GithubIcon, label: "GitHub", color: "hover:text-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]" },
-    { href: settings?.instagramUrl ?? "#", Icon: InstagramIcon, label: "Instagram", color: "hover:text-pink-400 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)]" },
-    { href: `mailto:${settings?.email ?? ""}`, Icon: Mail, label: "Email", color: "hover:text-cyan-400 hover:shadow-[0_0_15px_rgba(34,211,238,0.4)]" },
-  ];
+function yr(d: Date | string | null | undefined): string | null {
+  return d ? String(d).slice(0, 4) : null;
+}
+
+function span(a: Date | string | null | undefined, b: Date | string | null | undefined): string {
+  return `${yr(a)} – ${b ? yr(b) : "Present"}`;
+}
+
+function pad(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ body?: string }>;
+}) {
+  const sp = await searchParams;
+  const [projects, experiences, achievements, blogPosts, settings] = await Promise.all([
+    getPublishedProjects(),
+    getPublishedExperiences(),
+    getPublishedAchievements(),
+    getPublishedBlogPosts(),
+    getSiteSettings(),
+  ]);
+
+  if (!settings) return <div style={{ color: "#565d7c", textAlign: "center", padding: 80 }}>Settings not configured</div>;
+
+  const bodies: OrbitalBody[] = [];
+
+  bodies.push({
+    id: "star",
+    slug: "about",
+    ring: 0,
+    order: 0,
+    bodyType: "star",
+    status: "ACTIVE",
+    size: 5,
+    name: settings.name,
+    subtitle: settings.title,
+    designation: "STAR-00",
+    summary: settings.bio,
+    markdown: settings.aboutContent,
+    chips: [],
+    meta: [
+      { label: "callsign", value: settings.name },
+      { label: "role", value: settings.title },
+    ],
+    links: [
+      settings.githubUrl ? { label: "GitHub", url: settings.githubUrl } : null,
+      settings.linkedinUrl ? { label: "LinkedIn", url: settings.linkedinUrl } : null,
+      settings.instagramUrl ? { label: "Instagram", url: settings.instagramUrl } : null,
+    ].filter((l): l is { label: string; url: string } => l !== null && l.url !== ""),
+    images: [],
+  });
+
+  const sortedExps = [...experiences].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id.localeCompare(b.id)
+  );
+  let c1 = 0, c2 = 0;
+  for (const e of sortedExps) {
+    const current = e.endDate == null;
+    const ring = current ? 1 : 2;
+    const n = current ? ++c1 : ++c2;
+    bodies.push({
+      id: e.id,
+      slug: e.id,
+      ring,
+      order: e.order,
+      bodyType: current ? "station" : "satellite",
+      status: current ? "ACTIVE" : "ARCHIVED",
+      size: current ? 4 : 3,
+      name: `${e.title} · ${e.company}`,
+      subtitle: e.company,
+      designation: `${current ? "MSN" : "LOG"}-${pad(n)}`,
+      summary: e.description ? summ(e.description) : `${e.title} at ${e.company}.`,
+      markdown: e.description,
+      chips: e.techStack,
+      meta: [
+        { label: "company", value: e.company },
+        { label: "span", value: span(e.startDate, e.endDate) },
+        { label: "status", value: current ? "CURRENT" : "PAST" },
+      ],
+      links: [],
+      images: [],
+    });
+  }
+
+  const sortedProjects = [...projects].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id.localeCompare(b.id)
+  );
+  sortedProjects.forEach((p, i) => {
+    bodies.push({
+      id: p.id,
+      slug: p.slug,
+      ring: 3,
+      order: p.order,
+      bodyType: p.bodyType ? (p.bodyType.toLowerCase() as "probe" | "planet") : "probe",
+      status: p.status || "ACTIVE",
+      size: p.bodyType === "PLANET" ? 3 : 2,
+      name: p.title,
+      subtitle: null,
+      designation: `PRJ-${pad(i + 1)}`,
+      summary: p.description ? summ(p.description) : `${p.title} — ${p.status || "ACTIVE"}.`,
+      markdown: p.description,
+      chips: p.techStack,
+      meta: [
+        { label: "status", value: p.status || "ACTIVE" },
+        ...(p.launchedAt ? [{ label: "launched", value: yr(p.launchedAt)! }] : []),
+      ],
+      links: [
+        ...(p.githubUrl ? [{ label: "GitHub", url: p.githubUrl }] : []),
+        ...(p.liveUrl ? [{ label: "Live", url: p.liveUrl }] : []),
+      ],
+      images: p.imageIds.map((id) => `/api/media/${id}`),
+    });
+  });
+
+  const cometId = settings.cometAchievementId;
+  const belt = achievements
+    .filter((a) => a.id !== cometId)
+    .sort((a, b) => a.id.localeCompare(b.id));
+  belt.forEach((a, i) => {
+    bodies.push({
+      id: a.id,
+      slug: a.slug,
+      ring: 99,
+      order: i,
+      bodyType: "asteroid",
+      status: "ARCHIVED",
+      size: 1,
+      name: a.title,
+      subtitle: null,
+      designation: `AST-${pad(i + 1)}`,
+      summary: a.excerpt || summ(a.content),
+      markdown: a.content,
+      chips: [],
+      meta: [],
+      links: [],
+      images: a.imageIds.map((id) => `/api/media/${id}`),
+    });
+  });
+
+  const cometAch = achievements.find((a) => a.id === cometId);
+  if (cometAch) {
+    bodies.push({
+      id: "comet",
+      slug: cometAch.slug,
+      ring: 100,
+      order: 0,
+      bodyType: "comet",
+      status: "ACTIVE",
+      size: 3,
+      name: cometAch.title,
+      subtitle: null,
+      designation: "CMT-01",
+      summary: cometAch.excerpt || "Eccentric orbit. Passes rarely. Contains a cat.",
+      markdown: cometAch.content,
+      chips: [],
+      meta: [
+        { label: "field", value: "Surface codes" },
+        { label: "contains", value: "one (1) cat" },
+      ],
+      links: [],
+      images: cometAch.imageIds.map((id) => `/api/media/${id}`),
+    });
+  }
+
+  const transmissions: Transmission[] = blogPosts.slice(0, 3).map((p) => ({
+    title: p.title,
+    excerpt: p.excerpt,
+    slug: p.slug,
+  }));
+
+  const mapSettings: MapSettings = {
+    name: settings.name,
+    title: settings.title,
+    bio: settings.bio,
+    whyContent: settings.whyContent,
+    email: settings.email,
+    resumeUrl: settings.resumeId ? `/api/media/${settings.resumeId}` : null,
+    resumeFileName: settings.resumeFileName || null,
+    socialLinks: [
+      settings.githubUrl ? { label: "GitHub", url: settings.githubUrl } : null,
+      settings.linkedinUrl ? { label: "LinkedIn", url: settings.linkedinUrl } : null,
+      settings.instagramUrl ? { label: "Instagram", url: settings.instagramUrl } : null,
+    ].filter((l): l is { label: string; url: string } => l !== null && l.url !== ""),
+  };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      {/* Hero */}
-      <section className="mb-16">
-        <GlassCard className="p-8 sm:p-12">
-          <div className="space-y-4">
-            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium dark:bg-purple-500/10 dark:text-purple-400 dark:border dark:border-purple-500/30 bg-purple-100 text-purple-700 border border-purple-200">
-              Available for opportunities
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-bold">
-              <span className="dark:text-white text-gray-900">Hi, I&apos;m </span>
-              <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                {name}
-              </span>
-            </h1>
-            <p className="text-xl dark:text-white/70 text-gray-600 font-light">{title}</p>
-            {bio && (
-              <div className="max-w-2xl">
-                <MarkdownRenderer content={bio} />
-              </div>
-            )}
-
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              {socials.map(({ href, Icon, label, color }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  target={href.startsWith("mailto") ? undefined : "_blank"}
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className={`p-2.5 rounded-xl dark:bg-white/5 bg-gray-100 dark:border dark:border-white/10 border border-gray-200 dark:text-white/60 text-gray-500 transition-all duration-200 ${color}`}
-                >
-                  <Icon size={20} />
-                </Link>
-              ))}
-              {settings?.resumeId && (
-                <a
-                  href={`/api/media/${settings.resumeId}`}
-                  download={settings.resumeFileName || "resume.pdf"}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl dark:bg-purple-600/20 dark:border dark:border-purple-500/30 dark:text-purple-300 dark:hover:bg-purple-600/30 bg-purple-600 text-white hover:bg-purple-700 transition-all duration-200 text-sm font-medium"
-                >
-                  <Download size={16} />
-                  Resume
-                </a>
-              )}
-            </div>
-          </div>
-        </GlassCard>
-      </section>
-
-      {/* About */}
-      {aboutContent && (
-        <section>
-          <h2 className="text-2xl font-bold dark:text-white text-gray-900 mb-6 flex items-center gap-3">
-            <span className="w-8 h-0.5 dark:bg-purple-400 bg-purple-600 rounded" />
-            About Me
-          </h2>
-          <GlassCard className="p-6 sm:p-8">
-            <MarkdownRenderer content={aboutContent} />
-          </GlassCard>
-        </section>
-      )}
-    </div>
+    <OrbitalMapLoader
+      bodies={bodies}
+      transmissions={transmissions}
+      settings={mapSettings}
+      initialBodySlug={sp.body || null}
+    />
   );
 }

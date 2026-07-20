@@ -45,3 +45,11 @@ body {
 
 /* Inline code: dark mode */
 :root.dark .prose code { color: rgb(34, 211, 238); background: rgba(34,211,238,0.1); }
+
+/* Orbital map keyframes */
+@keyframes omPulse { 0%,100% { opacity: .35; transform: scale(1); } 50% { opacity: .9; transform: scale(1.28); } }
+@keyframes omCore { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes omScan { 0% { transform: translateY(-140%); } 100% { transform: translateY(140%); } }
+@keyframes omSuperA { 0%,100% { opacity: .72; } 50% { opacity: .18; } }
+@keyframes omSuperB { 0%,100% { opacity: .18; } 50% { opacity: .72; } }
+@keyframes omFlick { 0% { opacity: 1; } 100% { opacity: .35; } }

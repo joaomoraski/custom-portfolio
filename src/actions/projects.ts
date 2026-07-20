@@ -33,18 +33,33 @@ export async function getProjectById(id: string) {
   });
 }
 
+export async function getProjectBySlug(slug: string) {
+  return prisma.project.findFirst({
+    where: { slug, deletedAt: null },
+  });
+}
+
 export async function createProject(data: {
   title: string;
+  slug: string;
   description: string;
   techStack: string[];
   imageIds?: string[];
   githubUrl?: string;
   liveUrl?: string;
   published?: boolean;
+  status?: "ACTIVE" | "IN_DEV" | "ARCHIVED";
+  bodyType?: "PROBE" | "PLANET" | null;
+  launchedAt?: string | null;
   order?: number;
 }) {
   await requireAuth();
-  const project = await prisma.project.create({ data });
+  const project = await prisma.project.create({
+    data: {
+      ...data,
+      launchedAt: data.launchedAt ? new Date(data.launchedAt) : null,
+    },
+  });
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath("/");
@@ -55,17 +70,27 @@ export async function updateProject(
   id: string,
   data: {
     title?: string;
+    slug?: string;
     description?: string;
     techStack?: string[];
     imageIds?: string[];
     githubUrl?: string | null;
     liveUrl?: string | null;
     published?: boolean;
+    status?: "ACTIVE" | "IN_DEV" | "ARCHIVED";
+    bodyType?: "PROBE" | "PLANET" | null;
+    launchedAt?: string | null;
     order?: number;
   }
 ) {
   await requireAuth();
-  const project = await prisma.project.update({ where: { id }, data });
+  const project = await prisma.project.update({
+    where: { id },
+    data: {
+      ...data,
+      launchedAt: data.launchedAt !== undefined ? (data.launchedAt ? new Date(data.launchedAt) : null) : undefined,
+    },
+  });
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath("/");

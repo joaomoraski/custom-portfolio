@@ -8,17 +8,22 @@ import { ImageUploader } from "@/components/ui/image-uploader";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { createProject, updateProject } from "@/actions/projects";
 import { duplicateTagsMessage, mergeCommaSeparatedUnique } from "@/lib/comma-tags";
+import { slugify } from "@/lib/utils";
 
 interface ProjectFormProps {
   initial?: {
     id: string;
     title: string;
+    slug: string;
     description: string;
     techStack: string[];
     imageIds: string[];
     githubUrl?: string | null;
     liveUrl?: string | null;
     published: boolean;
+    status: string;
+    bodyType: string | null;
+    launchedAt: Date | string | null;
     order: number;
   };
 }
@@ -28,6 +33,8 @@ const inputClass = "w-full px-4 py-3 rounded-xl dark:bg-white/5 bg-white dark:bo
 export function ProjectForm({ initial }: ProjectFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
+  const [slug, setSlug] = useState(initial?.slug ?? "");
+  const [slugManual, setSlugManual] = useState(!!initial?.slug);
   const [description, setDescription] = useState(initial?.description ?? "");
   const [techStack, setTechStack] = useState<string[]>(initial?.techStack ?? []);
   const [techInput, setTechInput] = useState("");
@@ -36,9 +43,17 @@ export function ProjectForm({ initial }: ProjectFormProps) {
   const [githubUrl, setGithubUrl] = useState(initial?.githubUrl ?? "");
   const [liveUrl, setLiveUrl] = useState(initial?.liveUrl ?? "");
   const [published, setPublished] = useState(initial?.published ?? false);
+  const [status, setStatus] = useState(initial?.status ?? "ACTIVE");
+  const [bodyType, setBodyType] = useState<string | null>(initial?.bodyType ?? null);
+  const [launchedAt, setLaunchedAt] = useState(initial?.launchedAt ? new Date(initial.launchedAt).toISOString().split("T")[0] : "");
   const [order, setOrder] = useState(initial?.order ?? 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    if (!slugManual) setSlug(slugify(val));
+  };
 
   const addTech = () => {
     const { merged, duplicates } = mergeCommaSeparatedUnique(techInput, techStack);
@@ -55,12 +70,16 @@ export function ProjectForm({ initial }: ProjectFormProps) {
     try {
       const data = {
         title,
+        slug,
         description,
         techStack,
         imageIds,
         githubUrl: githubUrl || undefined,
         liveUrl: liveUrl || undefined,
         published,
+        status: status as "ACTIVE" | "IN_DEV" | "ARCHIVED",
+        bodyType: (bodyType as "PROBE" | "PLANET" | null) ?? undefined,
+        launchedAt: launchedAt || null,
         order,
       };
       if (initial) {
@@ -82,7 +101,42 @@ export function ProjectForm({ initial }: ProjectFormProps) {
       <GlassCard className="p-6 space-y-4">
         <div>
           <label className="block text-xs font-medium dark:text-white/60 text-gray-600 mb-1.5">Title *</label>
-          <input required value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} placeholder="Project title" />
+          <input required value={title} onChange={(e) => handleTitleChange(e.target.value)} className={inputClass} placeholder="Project title" />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium dark:text-white/60 text-gray-600 mb-1.5">Slug *</label>
+          <input
+            required
+            value={slug}
+            onChange={(e) => { setSlug(e.target.value); setSlugManual(true); }}
+            className={inputClass}
+            placeholder="project-slug"
+          />
+          <p className="text-xs dark:text-white/30 text-gray-400 mt-1">Auto-generated from title. Edit to override.</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-medium dark:text-white/60 text-gray-600 mb-1.5">Status</label>
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass}>
+              <option value="ACTIVE">Active</option>
+              <option value="IN_DEV">In Development</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium dark:text-white/60 text-gray-600 mb-1.5">Body Type</label>
+            <select value={bodyType ?? ""} onChange={(e) => setBodyType(e.target.value || null)} className={inputClass}>
+              <option value="">Default (Probe)</option>
+              <option value="PROBE">Probe</option>
+              <option value="PLANET">Planet</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium dark:text-white/60 text-gray-600 mb-1.5">Launched At</label>
+            <input type="date" value={launchedAt} onChange={(e) => setLaunchedAt(e.target.value)} className={inputClass} />
+          </div>
         </div>
 
         <div>
