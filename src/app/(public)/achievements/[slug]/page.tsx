@@ -32,7 +32,6 @@ export default async function AchievementPage({ params }: { params: Promise<{ sl
         <h1 style={{ fontFamily: "var(--font-ibm-plex), 'IBM Plex Sans', sans-serif", fontSize: 34, fontWeight: 600, color: "#f2f4ff", margin: "0 0 14px", lineHeight: 1.12 }}>{achievement.title}</h1>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 22 }}>
           <span style={{ fontSize: 10, letterSpacing: ".08em", padding: "4px 9px", border: "1px solid rgba(124,140,240,.35)", color: "#cbd2ea" }}>ACHIEVEMENT</span>
-          <span style={{ fontSize: 10, letterSpacing: ".08em", padding: "4px 9px", border: "1px solid rgba(90,97,128,.5)", color: "#5a6180" }}>ARCHIVED</span>
         </div>
         <OrbitalCarousel images={images} />
         <div style={{ height: 22 }} />

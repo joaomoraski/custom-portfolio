@@ -150,7 +150,7 @@ export default async function HomePage({
       ring: 99,
       order: i,
       bodyType: "asteroid",
-      status: "ARCHIVED",
+      status: "ACTIVE",
       size: 1,
       name: a.title,
       subtitle: null,
