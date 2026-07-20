@@ -7,6 +7,17 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ProjectStatus {
+  ACTIVE
+  IN_DEV
+  ARCHIVED
+}
+
+enum BodyType {
+  PROBE
+  PLANET
+}
+
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
@@ -17,17 +28,21 @@ model User {
 }
 
 model Project {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
+  slug        String         @unique @default("")
   description String
   techStack   String[]
-  imageIds    String[] // Stores array of Media IDs
+  imageIds    String[]
   githubUrl   String?
   liveUrl     String?
-  published   Boolean  @default(false)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  published   Boolean        @default(false)
+  status      ProjectStatus  @default(ACTIVE)
+  bodyType    BodyType?
+  launchedAt  DateTime?
+  order       Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   deletedAt   DateTime?
 }
 
@@ -45,16 +60,17 @@ model BlogPost {
 }
 
 model Achievement {
-  id           String    @id @default(cuid())
+  id           String         @id @default(cuid())
   title        String
-  slug         String    @unique
+  slug         String         @unique
   excerpt      String?
   content      String
   imageIds     String[]
-  published    Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  published    Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   deletedAt    DateTime?
+  cometFor     SiteSettings[] @relation("CometAchievement")
 }
 
 model ContactMessage {
@@ -69,18 +85,21 @@ model ContactMessage {
 }
 
 model SiteSettings {
-  id             String  @id @default("singleton")
-  name           String  @default("")
-  title          String  @default("")
-  bio            String  @default("")
-  aboutContent   String  @default("")
-  resumeId       String?
-  resume         Media?  @relation("Resume", fields: [resumeId], references: [id])
-  resumeFileName String? @default("João_Moraski_Resume.pdf")
-  linkedinUrl    String  @default("")
-  githubUrl      String  @default("")
-  instagramUrl   String  @default("")
-  email          String  @default("")
+  id                   String       @id @default("singleton")
+  name                 String       @default("")
+  title                String       @default("")
+  bio                  String       @default("")
+  aboutContent         String       @default("")
+  whyContent           String       @default("")
+  resumeId             String?
+  resume               Media?       @relation("Resume", fields: [resumeId], references: [id])
+  resumeFileName       String?      @default("João_Moraski_Resume.pdf")
+  linkedinUrl          String       @default("")
+  githubUrl            String       @default("")
+  instagramUrl         String       @default("")
+  email                String       @default("")
+  cometAchievementId   String?
+  cometAchievement     Achievement? @relation("CometAchievement", fields: [cometAchievementId], references: [id])
 }
 
 model Media {

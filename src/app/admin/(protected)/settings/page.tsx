@@ -14,12 +14,19 @@ interface Settings {
   title: string;
   bio: string;
   aboutContent: string;
+  whyContent: string;
   resumeId: string | null;
   resumeFileName: string;
   linkedinUrl: string;
   githubUrl: string;
   instagramUrl: string;
   email: string;
+  cometAchievementId: string | null;
+}
+
+interface AchievementOption {
+  id: string;
+  title: string;
 }
 
 export default function AdminSettingsPage() {
@@ -28,13 +35,16 @@ export default function AdminSettingsPage() {
     title: "",
     bio: "",
     aboutContent: "",
+    whyContent: "",
     resumeId: null,
     resumeFileName: "João_Moraski_Resume.pdf",
     linkedinUrl: "",
     githubUrl: "",
     instagramUrl: "",
     email: "",
+    cometAchievementId: null,
   });
+  const [achievements, setAchievements] = useState<AchievementOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -43,8 +53,10 @@ export default function AdminSettingsPage() {
     const load = async () => {
       try {
         const { getSiteSettings } = await import("@/actions/settings");
-        const data = await getSiteSettings();
+        const { getPublishedAchievements } = await import("@/actions/achievements");
+        const [data, achList] = await Promise.all([getSiteSettings(), getPublishedAchievements()]);
         if (data) setSettings(data as Settings);
+        if (achList) setAchievements(achList.map((a: { id: string; title: string }) => ({ id: a.id, title: a.title })));
       } catch { /* noop */ }
       setLoading(false);
     };
@@ -95,6 +107,29 @@ export default function AdminSettingsPage() {
         <GlassCard className="p-8 space-y-5">
           <h2 className="text-base font-semibold dark:text-white/80 text-gray-800 border-b dark:border-white/10 border-gray-200 pb-2">About Content</h2>
           <MarkdownEditor value={settings.aboutContent} onChange={(v) => setSettings((s) => ({ ...s, aboutContent: v }))} height={500} />
+        </GlassCard>
+
+        <GlassCard className="p-8 space-y-5">
+          <h2 className="text-base font-semibold dark:text-white/80 text-gray-800 border-b dark:border-white/10 border-gray-200 pb-2">Why a Solar System?</h2>
+          <MarkdownEditor value={settings.whyContent} onChange={(v) => setSettings((s) => ({ ...s, whyContent: v }))} height={300} />
+        </GlassCard>
+
+        <GlassCard className="p-8 space-y-5">
+          <h2 className="text-base font-semibold dark:text-white/80 text-gray-800 border-b dark:border-white/10 border-gray-200 pb-2">Orbital Map</h2>
+          <div>
+            <label className="block text-xs font-medium dark:text-white/60 text-gray-600 mb-1.5">Comet Achievement</label>
+            <select
+              value={settings.cometAchievementId ?? ""}
+              onChange={(e) => setSettings((s) => ({ ...s, cometAchievementId: e.target.value || null }))}
+              className={inputClass}
+            >
+              <option value="">None (no comet)</option>
+              {achievements.map((a) => (
+                <option key={a.id} value={a.id}>{a.title}</option>
+              ))}
+            </select>
+            <p className="text-xs dark:text-white/30 text-gray-400 mt-1">The achievement that appears as a comet on the orbital map.</p>
+          </div>
         </GlassCard>
 
         <GlassCard className="p-8 space-y-5">

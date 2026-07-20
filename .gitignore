@@ -50,3 +50,10 @@ coverage/
 # Misc
 *.pem
 .cache/
+
+# OMC state
+.omc/
+
+# Orbital prototype (source material, not shipped)
+orbital-portfolio/
+orbital-portfolio.zip

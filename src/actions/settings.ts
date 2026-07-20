@@ -15,16 +15,15 @@ async function requireAuth() {
 export async function getSiteSettings() {
   return prisma.siteSettings.findUnique({
     where: { id: "singleton" },
-    include: { resume: true },
+    include: { resume: true, cometAchievement: true },
   });
 }
 
 export async function updateSiteSettings(data: Partial<SiteSettings>) {
   await requireAuth();
   
-  // Remove the 'resume' relation object if it exists before saving to DB
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  const { resume, ...dbData } = data as any;
+  const { resume, cometAchievement, ...dbData } = data as any;
   
   const result = await prisma.siteSettings.upsert({
     where: { id: "singleton" },

@@ -1,29 +1,34 @@
-# Portfolio CMS
+# moraski.dev — Orbital Portfolio
 
-A personal portfolio and CMS built with Next.js 16 — featuring a themed UI (dark gradient + glassmorphism + neon accents), full content management via an admin dashboard, visitor analytics, and a markdown-powered blog and achievements section.
+A personal portfolio built as an interactive orbital map. The public site is a "mission control" solar system where the star is me, experiences orbit on inner rings, projects on the outer ring, achievements scatter the asteroid belt, and a comet carries a Schrödinger's cat experiment. An admin panel behind auth manages all content.
 
-## Features
+## The Map
 
-- **Public portfolio** — About, Projects, Blog, Achievements, Contact pages
-- **Admin dashboard** — CMS for all content, visitor analytics, contact inbox
-- **Theme** — `black → purple → blue` gradient, glassmorphism cards, neon accents, dark/light mode
-- **Markdown** — full editor (admin) and rendered output (public) for blog posts and achievements
-- **Image/PDF storage** — media stored in PostgreSQL, served via API route
-- **Contact form** — saved to DB; optional email notification via SMTP
-- **Visitor tracking** — page views logged and charted in the admin dashboard
-- **Single admin user** — created from env vars at seed time, no registration endpoint
+The home page renders an SVG solar system with real-time animation:
+
+- **Ring 0** — The star (operator profile from Settings)
+- **Ring 1** — Current experiences (stations, `endDate = null`)
+- **Ring 2** — Past experiences (satellites)
+- **Ring 3** — Projects (probes or planets, configurable)
+- **Belt** — Achievements (asteroids)
+- **Comet** — One featured achievement on an eccentric Kepler orbit, carrying the cat
+
+Bodies are clickable — a dossier panel slides open with full details, tech stack, links, and markdown content. Zoom, pan, drag, keyboard navigation, and a `prefers-reduced-motion` static fallback are all built in.
+
+Conventional pages (`/about`, `/projects`, `/experiences`, `/blog`, `/achievements`, `/contact`) use the same aesthetic with a shared orbital header.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Framework | Next.js 16 (App Router, TypeScript) |
-| Styling | Tailwind CSS v4 + `next-themes` |
+| Public UI | Inline styles, Space Mono + IBM Plex Sans, dark-only |
+| Admin UI | Tailwind CSS v4 + `next-themes` (dark/light) |
 | ORM | Prisma 7 |
-| Database | PostgreSQL 16 |
+| Database | PostgreSQL 17 |
 | Auth | NextAuth v5 (credentials, JWT) |
-| Markdown | `@uiw/react-md-editor` + `react-markdown` |
-| Charts | Recharts |
+| Markdown | Self-contained orbital renderer (public) + `@uiw/react-md-editor` (admin) |
+| Charts | Recharts (admin analytics) |
 | Package manager | pnpm |
 
 ## Getting Started
@@ -38,17 +43,17 @@ A personal portfolio and CMS built with Next.js 16 — featuring a themed UI (da
 
 ```bash
 git clone <your-repo-url>
-cd custom-portfolio
+cd <repo-name>
 pnpm install
 ```
 
-### 2. Configure environment variables
+### 2. Configure environment
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and set at minimum:
+Set at minimum:
 
 ```env
 DATABASE_URL="postgresql://portfolio:portfolio@localhost:5432/portfolio"
@@ -57,7 +62,7 @@ ADMIN_EMAIL="your@email.com"
 ADMIN_PASSWORD="your-strong-password"
 ```
 
-SMTP fields are optional — if omitted, contact messages are only stored in the database.
+SMTP fields are optional — if omitted, contact messages are stored in the database only.
 
 ### 3. Start the database
 
@@ -68,8 +73,8 @@ pnpm docker:up
 ### 4. Push schema and seed
 
 ```bash
-pnpm db:push    # creates tables
-pnpm db:seed    # creates admin user + default site settings
+pnpm db:push
+pnpm db:seed
 ```
 
 ### 5. Start the dev server
@@ -78,8 +83,8 @@ pnpm db:seed    # creates admin user + default site settings
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the portfolio.
-Open [http://localhost:3000/admin/login](http://localhost:3000/admin/login) to access the admin dashboard.
+Open [http://localhost:3000](http://localhost:3000) for the orbital map.
+Open [http://localhost:3000/admin/login](http://localhost:3000/admin/login) for the admin panel.
 
 ## Scripts
 
@@ -92,7 +97,7 @@ Open [http://localhost:3000/admin/login](http://localhost:3000/admin/login) to a
 | `pnpm docker:down` | Stop PostgreSQL container |
 | `pnpm db:push` | Push Prisma schema to database |
 | `pnpm db:seed` | Seed admin user and default settings |
-| `pnpm db:migrate` | Create and apply a migration |
+| `pnpm db:generate` | Regenerate Prisma client |
 | `pnpm db:studio` | Open Prisma Studio |
 
 ## Project Structure
@@ -100,66 +105,61 @@ Open [http://localhost:3000/admin/login](http://localhost:3000/admin/login) to a
 ```
 src/
 ├── app/
-│   ├── (public)/          # Public-facing pages
-│   │   ├── page.tsx       # About / Home
+│   ├── (public)/              # Public orbital pages
+│   │   ├── page.tsx           # Orbital map (home)
+│   │   ├── about/
 │   │   ├── projects/
+│   │   ├── projects/[slug]/
+│   │   ├── experiences/
 │   │   ├── blog/
+│   │   ├── blog/[slug]/
 │   │   ├── achievements/
+│   │   ├── achievements/[slug]/
 │   │   └── contact/
-│   ├── admin/             # Protected CMS dashboard
-│   │   ├── page.tsx       # Analytics dashboard
+│   ├── admin/                 # Protected CMS dashboard
+│   │   ├── page.tsx           # Analytics dashboard
 │   │   ├── projects/
 │   │   ├── blog/
 │   │   ├── achievements/
+│   │   ├── experiences/
 │   │   ├── messages/
 │   │   └── settings/
-│   └── api/               # API routes (auth, media, contact, tracking)
-├── actions/               # Server actions (CRUD for all content)
+│   └── api/                   # API routes (auth, media, contact, tracking)
+├── actions/                   # Server actions (CRUD)
 ├── components/
-│   ├── ui/                # Shared UI (GlassCard, NeonButton, MarkdownEditor…)
-│   ├── layout/            # Navbar, Footer
-│   └── admin/             # Admin-only components (forms, charts)
-├── lib/                   # prisma.ts, auth.ts, mail.ts, utils.ts
-└── proxy.ts               # Next.js 16 proxy: admin auth guard + analytics
+│   ├── orbital/               # Orbital map + shared orbital components
+│   ├── ui/                    # Shared UI (GlassCard, NeonButton, etc.)
+│   └── admin/                 # Admin forms and charts
+├── lib/                       # prisma.ts, auth.ts, mail.ts, utils.ts
+└── proxy.ts                   # Auth guard + analytics proxy
 prisma/
 ├── schema.prisma
 └── seed.ts
-docker-compose.yml
 ```
 
-## Admin Dashboard
+## Admin Panel
 
-Log in at `/admin/login` with the credentials set in your `.env`.
+Log in at `/admin/login` with the credentials from `.env`.
 
-| Section | What you can manage |
-|---------|-------------------|
+| Section | What you manage |
+|---------|----------------|
 | Dashboard | Visitor stats, daily views chart |
-| Projects | Create/edit/delete projects with image, tech stack, links |
-| Blog | Write posts in Markdown with cover image and publish toggle |
-| Achievements | Same as blog — share milestones with Markdown and photos |
-| Messages | View contact form submissions, mark read/unread |
-| Settings | Name, bio, about page, social links, resume PDF upload |
+| Projects | Title, slug, description (markdown), tech stack, images, status, body type, launched date, GitHub/live URLs |
+| Blog | Posts in markdown with cover image and publish toggle |
+| Achievements | Milestones with markdown, images, and publish toggle |
+| Experiences | Role, company, date range, tech stack, description |
+| Messages | Contact form submissions, read/unread |
+| Settings | Name, bio, about page, "Why a solar system?" content, social links, resume PDF, comet achievement |
 
-## Changing the Admin Password
+## Schema Highlights
 
-Update `ADMIN_PASSWORD` in `.env`, then re-run:
+- **Soft deletes** — all models use `deletedAt` instead of hard deletes
+- **Media in DB** — images and PDFs stored as `Bytes` in PostgreSQL, served via `/api/media/[id]`
+- **Project.slug** — auto-generated from title, manual override in admin
+- **Project.status** — `ACTIVE` / `IN_DEV` / `ARCHIVED` (affects map glyph rendering)
+- **Project.bodyType** — `PROBE` (triangle) or `PLANET` (ringed circle) on the map
+- **SiteSettings.cometAchievementId** — FK pointing to the achievement that becomes the comet
 
-```bash
-pnpm db:seed
-```
+## The Cat
 
-The seed script uses `upsert`, so it updates the existing user safely.
-
-## Optional: Email Notifications
-
-To receive an email when someone submits the contact form, add to `.env`:
-
-```env
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT=587
-SMTP_USER="your-email@gmail.com"
-SMTP_PASS="your-app-password"
-CONTACT_EMAIL="recipient@example.com"
-```
-
-If these are not set, the app works normally — messages are just stored in the database.
+The comet's dossier contains a Schrödinger's cat apparatus. Press OBSERVE to collapse the wavefunction — the outcome is genuinely random via `Math.random()`. Press RESEAL to return to superposition. It uses `omSuperA`/`omSuperB` CSS keyframes for the oscillation and `omScan`/`omFlick` for the measurement sweep.
